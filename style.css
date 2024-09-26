@@ -1,0 +1,126 @@
+body {
+  font-family: Helvetica, sans-serif;
+  background-color: black;
+  color: white;
+  line-height: 1.5;
+  font-size: 1.25rem;
+  padding: 2rem;
+}
+
+section,
+footer {
+  max-width: 50rem;
+  margin: auto;
+}
+
+footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+a {
+  padding: 0.5rem 1rem;
+  border-bottom: 4px solid #0e496b;
+  display: inline-block;
+  color: white;
+  background-color: #2977a5;
+  text-decoration: none;
+}
+a:hover {
+  background-color: #4297c8;
+}
+#navigation {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.shrimps-logo {
+  margin: auto;
+  margin-bottom: 1rem;
+  display: block;
+  max-width: 13rem;
+}
+
+.question {
+  font-weight: bold;
+  color: #ea4d78;
+}
+.answer {
+  font-style: italic;
+}
+
+time {
+  font-weight: bold;
+  color: #ea4d78;
+}
+
+.where {
+  font-style: italic;
+}
+
+.unstyled-list {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.bordered-list li {
+  border-radius: 7px;
+  border: 1px solid #ea4d78;
+  padding: 1rem;
+}
+
+#workshops .bordered-list li,
+#next-workshop.bordered-list li {
+  border-color: #febc29;
+}
+
+#workshops time,
+#next-workshop time {
+  color: #febc29;
+}
+
+.row-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.upcoming-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.upcoming-container > div {
+  width: 100%;
+}
+
+.next-show-header {
+  margin-top: 0;
+  color: #ea4d78;
+}
+
+.next-workshop-header {
+  margin-top: 0;
+  color: #febc29;
+}
+
+.highlight {
+  color: #febc29;
+  font-weight: bold;
+  margin: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .upcoming-container {
+    flex-wrap: nowrap;
+  }
+  .upcoming-container > div {
+    max-width: 50%;
+  }
+}
