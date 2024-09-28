@@ -98,6 +98,7 @@ time {
 }
 .upcoming-container > div {
   width: 100%;
+  min-height: 15.25rem;
 }
 
 .next-show-header {
@@ -114,6 +115,10 @@ time {
   color: #febc29;
   font-weight: bold;
   margin: 0 1rem;
+}
+
+.time-until {
+  font-weight: normal;
 }
 
 @media (min-width: 768px) {

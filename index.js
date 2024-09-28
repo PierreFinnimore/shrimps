@@ -47,13 +47,20 @@ function getMostRecent(containerId) {
   return futureEls[0];
 }
 
+function createWatchThisSpace() {
+  const watchThisSpace = document.createElement("li");
+  watchThisSpace.innerText = "Watch this space...";
+  return watchThisSpace;
+}
+
 function setupUpcoming() {
   const nextWorkshop = document.getElementById("next-workshop");
   const latestWorkshop = getMostRecent("workshops");
+
   if (latestWorkshop) {
     nextWorkshop.appendChild(latestWorkshop.cloneNode(true));
   } else {
-    nextWorkshop.innerText = "Watch this space...";
+    nextWorkshop.appendChild(createWatchThisSpace());
   }
 
   const nextShow = document.getElementById("next-show");
@@ -61,13 +68,88 @@ function setupUpcoming() {
   if (latestShow) {
     nextShow.appendChild(latestShow.cloneNode(true));
   } else {
-    nextShow.innerText = "Watch this space...";
+    nextShow.appendChild(createWatchThisSpace());
   }
+}
+
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
+function setupTimes() {
+  const timeEls = document.getElementsByTagName("time");
+
+  for (let i = 0; i < timeEls.length; i++) {
+    const timeEl = timeEls[i];
+    const date = new Date(timeEl.dateTime);
+
+    const optionsDate = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
+    const optionsTime = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    };
+
+    const day = date.getDate();
+    const dateString = date
+      .toLocaleString("en-UK", optionsDate)
+      .replace(/(\d+)/, `${day}${getOrdinalSuffix(day)}`);
+    const timeString = date.toLocaleString("en-UK", optionsTime);
+
+    timeEl.textContent = `${dateString} ${timeString}`;
+
+    const untilSpan = document.createElement("div");
+    untilSpan.classList.add("time-until");
+    untilSpan.dataset.timestamp = date;
+    timeEl.appendChild(untilSpan);
+  }
+}
+
+function startCheckingTimeUntil() {
+  const timeUntilEls = document.getElementsByClassName("time-until");
+  setInterval(() => {
+    const now = new Date();
+    for (let i = 0; i < timeUntilEls.length; i++) {
+      const el = timeUntilEls[i];
+      const date = new Date(el.dataset.timestamp);
+      const diff = date - now;
+      let resultString = "";
+      if (diff > 0) {
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / (24 * 3600));
+        const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        resultString = `(${days}d ${hours}h ${minutes}m ${seconds}s)`;
+      } else {
+        resultString = "(Already happened!)";
+      }
+      el.innerText = resultString;
+    }
+  }, 1000);
 }
 
 function main() {
   setupNav();
   setupUpcoming();
+  setupTimes();
+  startCheckingTimeUntil();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
