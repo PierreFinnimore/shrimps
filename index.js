@@ -121,28 +121,31 @@ function setupTimes() {
   }
 }
 
+function updateTimeUntils(timeUntilEls) {
+  const now = new Date();
+  for (let i = 0; i < timeUntilEls.length; i++) {
+    const el = timeUntilEls[i];
+    const date = new Date(el.dataset.timestamp);
+    const diff = date - now;
+    let resultString = "";
+    if (diff > 0) {
+      const totalSeconds = Math.floor(diff / 1000);
+      const days = Math.floor(totalSeconds / (24 * 3600));
+      const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      resultString = `(${days}d ${hours}h ${minutes}m ${seconds}s)`;
+    } else {
+      resultString = "(Already happened!)";
+    }
+    el.innerText = resultString;
+  }
+}
+
 function startCheckingTimeUntil() {
   const timeUntilEls = document.getElementsByClassName("time-until");
-  setInterval(() => {
-    const now = new Date();
-    for (let i = 0; i < timeUntilEls.length; i++) {
-      const el = timeUntilEls[i];
-      const date = new Date(el.dataset.timestamp);
-      const diff = date - now;
-      let resultString = "";
-      if (diff > 0) {
-        const totalSeconds = Math.floor(diff / 1000);
-        const days = Math.floor(totalSeconds / (24 * 3600));
-        const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        resultString = `(${days}d ${hours}h ${minutes}m ${seconds}s)`;
-      } else {
-        resultString = "(Already happened!)";
-      }
-      el.innerText = resultString;
-    }
-  }, 1000);
+  updateTimeUntils(timeUntilEls);
+  setInterval(() => updateTimeUntils(timeUntilEls), 1000);
 }
 
 function main() {
