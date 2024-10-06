@@ -94,13 +94,14 @@ function setupTimes() {
     const date = new Date(timeEl.dateTime);
 
     const optionsDate = {
+      weekday: "short",
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     };
 
     const optionsTime = {
-      hour: "2-digit",
+      hour: "numeric",
       minute: "2-digit",
       hour12: true,
       timeZoneName: "short",
