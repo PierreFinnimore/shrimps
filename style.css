@@ -77,12 +77,14 @@ time {
 }
 
 #workshops .bordered-list li,
-#next-workshop.bordered-list li {
+#next-workshop.bordered-list li,
+.bordered-list li.past-workshop {
   border-color: #febc29;
 }
 
 #workshops time,
-#next-workshop time {
+#next-workshop time,
+.bordered-list li.past-workshop time {
   color: #febc29;
 }
 
@@ -99,7 +101,6 @@ time {
 }
 .upcoming-container > div {
   width: 100%;
-  min-height: 15.25rem;
 }
 
 .next-show-header {
@@ -120,6 +121,61 @@ time {
 
 .time-until {
   font-weight: normal;
+}
+
+.dance {
+  animation: danceB 2s ease-in-out infinite;
+}
+
+.dance:first-child {
+  animation: danceA 1s ease-in-out infinite;
+}
+
+.shrimp.dance {
+  animation-play-state: paused;
+}
+
+.shrimp.dance.playing {
+  animation-play-state: running;
+}
+
+@keyframes danceB {
+  0%,
+  12% {
+    transform: rotateZ(0);
+  }
+
+  40% {
+    transform: rotateZ(0.1turn);
+  }
+  50% {
+    transform: rotateZ(-0.1turn);
+  }
+  55% {
+    transform: rotateZ(-0.12turn);
+  }
+
+  72% {
+    transform: translateY(-200%) rotateZ(0.5turn);
+  }
+
+  88%,
+  100% {
+    transform: rotateZ(1turn);
+  }
+}
+
+@keyframes danceA {
+  0% {
+    transform: rotateZ(0);
+  }
+  50% {
+    transform: translate(0, -100%) rotateZ(-0.1turn) translate(-100%, 0%)
+      rotateZ(-0.1turn);
+  }
+  100% {
+    transform: rotateZ(0);
+  }
 }
 
 @media (min-width: 768px) {

@@ -53,6 +53,61 @@ function createWatchThisSpace() {
   return watchThisSpace;
 }
 
+function setupPastGlories() {
+  const allWorkshops = document.querySelectorAll("#workshops li");
+  const allShows = document.querySelectorAll("#shows li");
+
+  const now = new Date();
+  const pastEls = [...Array.from(allShows), ...Array.from(allWorkshops)].filter(
+    (el) => {
+      const timeEl = el.querySelector("time");
+      if (!timeEl) {
+        return false;
+      }
+      if (!timeEl.dateTime) {
+        return false;
+      }
+      const date = new Date(timeEl.dateTime);
+      if (date > now) {
+        return false;
+      }
+      return true;
+    }
+  );
+
+  if (!pastEls.length) {
+    return null;
+  }
+  pastEls.sort((a, b) => {
+    const aTimeEl = a.querySelector("time");
+    const bTimeEl = b.querySelector("time");
+    const aDate = new Date(aTimeEl.dateTime);
+    const bDate = new Date(bTimeEl.dateTime);
+
+    return bDate - aDate;
+  });
+
+  const newContainer = document.querySelector("#past-glories ol");
+  for (let i = 0; i < pastEls.length; i++) {
+    const showOrWorkshop = pastEls[i].parentElement.parentElement.id;
+    pastEls[i].classList.add(
+      showOrWorkshop === "shows" ? "past-show" : "past-workshop"
+    );
+    newContainer.appendChild(pastEls[i]);
+  }
+
+  const workshopsLeft = document.querySelectorAll("#workshops li");
+  if (Array.from(workshopsLeft).length === 0) {
+    const workshopContainer = document.querySelector("#workshops ol");
+    workshopContainer.appendChild(createWatchThisSpace());
+  }
+  const showsLeft = document.querySelectorAll("#shows li");
+  if (Array.from(showsLeft).length === 0) {
+    const workshopContainer = document.querySelector("#shows ol");
+    workshopContainer.appendChild(createWatchThisSpace());
+  }
+}
+
 function setupUpcoming() {
   const nextWorkshop = document.getElementById("next-workshop");
   const latestWorkshop = getMostRecent("workshops");
@@ -149,10 +204,27 @@ function startCheckingTimeUntil() {
   setInterval(() => updateTimeUntils(timeUntilEls), 1000);
 }
 
+function setupShrimps() {
+  const shrimps = document.getElementsByClassName("shrimp");
+  for (let i = 0; i < shrimps.length; i++) {
+    const shrimp = shrimps[i];
+    shrimp.addEventListener("click", (evt) => {
+      const el = evt.target;
+      if (el.classList.contains("playing")) {
+        el.classList.remove("playing");
+      } else {
+        el.classList.add("playing");
+      }
+    });
+  }
+}
+
 function main() {
   setupNav();
   setupUpcoming();
+  setupPastGlories();
   setupTimes();
+  setupShrimps();
   startCheckingTimeUntil();
 }
 
