@@ -45,15 +45,13 @@ a:hover {
   max-width: 13rem;
 }
 
-.question {
-  font-weight: bold;
-  color: #ea4d78;
-}
 .answer {
   font-style: italic;
 }
 
-time {
+time,
+.question,
+.show-name {
   font-weight: bold;
   color: #ea4d78;
 }
@@ -116,7 +114,16 @@ time {
 .highlight {
   color: #febc29;
   font-weight: bold;
-  margin: 0 1rem;
+}
+
+#contact li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+#contact li .highlight {
+  word-break: break-word;
 }
 
 .time-until {
