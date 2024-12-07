@@ -1,3 +1,5 @@
+const twoHours = 2 * 1000 * 60 * 60;
+
 function setupNav() {
   const nav = document.getElementById("navigation");
   const sections = document.getElementsByTagName("section");
@@ -58,6 +60,8 @@ function setupPastGlories() {
   const allShows = document.querySelectorAll("#shows li");
 
   const now = new Date();
+  now.setHours(now.getHours() - 2);
+
   const pastEls = [...Array.from(allShows), ...Array.from(allWorkshops)].filter(
     (el) => {
       const timeEl = el.querySelector("time");
@@ -183,7 +187,9 @@ function updateTimeUntils(timeUntilEls) {
     const el = timeUntilEls[i];
     const date = new Date(el.dataset.timestamp);
     const diff = date - now;
+
     let resultString = "";
+
     if (diff > 0) {
       const totalSeconds = Math.floor(diff / 1000);
       const days = Math.floor(totalSeconds / (24 * 3600));
@@ -191,6 +197,8 @@ function updateTimeUntils(timeUntilEls) {
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
       resultString = `(${days}d ${hours}h ${minutes}m ${seconds}s)`;
+    } else if (diff > -twoHours) {
+      resultString = "(Happening Now!)";
     } else {
       resultString = "(Already happened!)";
     }
