@@ -20,6 +20,7 @@ function getMostRecent(containerId) {
   const container = document.getElementById(containerId);
   const listEls = Array.from(container.getElementsByTagName("li"));
   const now = new Date();
+  now.setHours(now.getHours() - 2);
   const futureEls = listEls.filter((el) => {
     const timeEl = el.querySelector("time");
     if (!timeEl) {
@@ -29,6 +30,7 @@ function getMostRecent(containerId) {
       return false;
     }
     const date = new Date(timeEl.dateTime);
+
     if (date < now) {
       return false;
     }
