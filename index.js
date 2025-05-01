@@ -54,6 +54,7 @@ function getMostRecent(containerId) {
 function createWatchThisSpace() {
   const watchThisSpace = document.createElement("li");
   watchThisSpace.innerText = "Watch this space...";
+  watchThisSpace.classList.add("watch");
   return watchThisSpace;
 }
 
@@ -116,6 +117,7 @@ function setupPastGlories() {
 
 function setupUpcoming() {
   const nextWorkshop = document.getElementById("next-workshop");
+  nextWorkshop.innerHTML = "";
   const latestWorkshop = getMostRecent("workshops");
 
   if (latestWorkshop) {
@@ -125,6 +127,7 @@ function setupUpcoming() {
   }
 
   const nextShow = document.getElementById("next-show");
+  nextShow.innerHTML = "";
   const latestShow = getMostRecent("shows");
   if (latestShow) {
     nextShow.appendChild(latestShow.cloneNode(true));
