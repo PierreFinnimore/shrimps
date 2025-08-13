@@ -30,6 +30,11 @@ a {
 a:hover {
   background-color: #4297c8;
 }
+
+.inline-button {
+  padding: 0 0.5rem;
+}
+
 #navigation {
   display: flex;
   justify-content: center;
