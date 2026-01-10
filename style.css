@@ -19,15 +19,26 @@ footer {
   margin-top: 2rem;
 }
 
-a {
+a,
+button {
+  cursor: pointer;
   padding: 0.5rem 1rem;
+  border: none;
   border-bottom: 4px solid #0e496b;
   display: inline-block;
   color: white;
   background-color: #2977a5;
   text-decoration: none;
 }
-a:hover {
+button div {
+  pointer-events: none;
+}
+button div button {
+  pointer-events: all;
+}
+
+a:hover,
+button:hover {
   background-color: #4297c8;
 }
 
@@ -56,6 +67,11 @@ a:hover {
   font-style: italic;
 }
 
+time {
+  padding-right: 2.5rem;
+  display: inline-block;
+}
+
 time,
 .question,
 .show-name {
@@ -76,6 +92,7 @@ time,
 }
 
 .bordered-list li {
+  position: relative;
   border-radius: 7px;
   border: 1px solid #ea4d78;
   padding: 1rem;
@@ -128,6 +145,25 @@ time,
   font-weight: bold;
 }
 
+.toggle-calendar {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  width: 2rem;
+  height: 2rem;
+}
+.toggle-calendar div {
+  padding: 1rem;
+  background-color: #000000c0;
+  z-index: 2;
+  top: 3rem;
+  right: 0;
+  position: absolute;
+  display: flex;
+  gap: 1rem;
+  animation: expand-down 0.1s ease-out forwards;
+}
+
 #contact li {
   display: flex;
   flex-wrap: wrap;
@@ -156,6 +192,16 @@ time,
 
 .shrimp.dance.playing {
   animation-play-state: running;
+}
+
+@keyframes expand-down {
+  0% {
+    opacity: 0;
+    transform: translate(0, -2rem);
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes danceB {

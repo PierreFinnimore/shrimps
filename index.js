@@ -232,9 +232,173 @@ function setupShrimps() {
   }
 }
 
+function formatForGoogle(date) {
+  return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+}
+
+const HOURS_PER_EVENT = 2;
+
+function getCalendarEvent(event) {
+  const data = event.target.parentElement.parentElement.dataset;
+
+  const endBase = new Date(data.dateTime);
+  endBase.setHours(endBase.getHours() + HOURS_PER_EVENT);
+  const title = data.title;
+  const description = data.description;
+  let location = data.location;
+  if (location.includes(`Students' Union`)) {
+    location = location.replace(
+      `Students' Union`,
+      `Sheffield Students' Union, Western Bank, Broomhall, Sheffield S10 2TG`
+    );
+  }
+  const start = new Date(data.dateTime);
+  const end = endBase;
+
+  return {
+    title,
+    description,
+    location,
+    start,
+    end,
+  };
+}
+
+function handleGoogleClick(event) {
+  event.stopPropagation();
+  const calendarEvent = getCalendarEvent(event);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: calendarEvent.title,
+    details: calendarEvent.description,
+    location: calendarEvent.location,
+    dates: `${formatForGoogle(calendarEvent.start)}/${formatForGoogle(
+      calendarEvent.end
+    )}`,
+  });
+  window.open(
+    "https://calendar.google.com/calendar/render?" + params.toString(),
+    "_blank"
+  );
+}
+
+function handleICSClick(event) {
+  event.stopPropagation();
+  const calendarEvent = getCalendarEvent(event);
+  const url = URL.createObjectURL(
+    new Blob(
+      [
+        [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//yourdomain//EN",
+          "BEGIN:VEVENT",
+          "UID:" + Date.now() + "@example.com",
+          "DTSTAMP:" + formatICSDate(new Date()),
+          "DTSTART:" + formatICSDate(calendarEvent.start),
+          "DTEND:" + formatICSDate(calendarEvent.end),
+          "SUMMARY:" + (calendarEvent.title || ""),
+          "DESCRIPTION:" + (calendarEvent.description || ""),
+          "LOCATION:" + (calendarEvent.location || ""),
+          "END:VEVENT",
+          "END:VCALENDAR",
+        ].join("\r\n"),
+      ],
+      {
+        type: "text/calendar;charset=utf-8",
+      }
+    )
+  );
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (calendarEvent.title || "event") + ".ics";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function formatICSDate(date) {
+  return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+}
+
+function toggleCalendarDropdown(event) {
+  event.stopPropagation();
+
+  const btn = event.target.closest("button");
+  const isExpanded = btn.dataset.expanded === "true";
+  btn.dataset.expanded = !isExpanded;
+
+  if (isExpanded) {
+    btn.innerText = "+";
+  } else {
+    btn.innerText = "-";
+    const dropdown = document.createElement("div");
+    dropdown.dataset = "";
+
+    const googleBtn = document.createElement("button");
+    googleBtn.innerText = "Google Calendar";
+    googleBtn.addEventListener("click", handleGoogleClick);
+
+    const icsBtn = document.createElement("button");
+    icsBtn.innerText = "ICS Calendar";
+    icsBtn.addEventListener("click", handleICSClick);
+
+    dropdown.appendChild(googleBtn);
+    dropdown.appendChild(icsBtn);
+    btn.appendChild(dropdown);
+  }
+}
+
+function setupCalendars() {
+  const now = new Date();
+  document
+    .querySelectorAll(
+      "#shows ol li, #workshops ol li, #next-workshop li, #next-show li"
+    )
+    .forEach((el) => {
+      const timeEl = el.querySelector("time");
+      if (!timeEl) {
+        return;
+      }
+      const dateTime = new Date(timeEl.dateTime);
+      if (dateTime < now) {
+        return;
+      }
+
+      const whereEl = el.querySelector(".where");
+      const location = whereEl ? whereEl.innerText : "";
+      const whatEl = el.querySelector(".what");
+      const description = whatEl ? whatEl.innerText : "";
+
+      const parent = el.parentElement;
+
+      const isShow =
+        parent.id === "next-show" || parent.parentElement.id === "shows";
+      const showTitleEl = el.querySelector(".show-name");
+      let title = "Shrimps Improv Workshop";
+      if (isShow) {
+        title = showTitleEl
+          ? showTitleEl.innerText + " (Improv Show)"
+          : "Shrimps Improv Show";
+      }
+      const buttonEl = document.createElement("button");
+      buttonEl.classList.add("toggle-calendar", "inline-button");
+      buttonEl.innerText = "+";
+      buttonEl.type = "button";
+      buttonEl.dataset.dateTime = dateTime;
+      buttonEl.dataset.location = location;
+      buttonEl.dataset.title = title;
+      buttonEl.dataset.description = description;
+      buttonEl.addEventListener("click", toggleCalendarDropdown);
+      el.appendChild(buttonEl);
+    });
+}
+
 function main() {
   setupNav();
   setupUpcoming();
+  setupCalendars();
   setupPastGlories();
   setupTimes();
   setupShrimps();
