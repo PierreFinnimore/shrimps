@@ -238,25 +238,25 @@ function formatForGoogle(date) {
 
 const HOURS_PER_EVENT = 2;
 
-function getCalendarEvent(event) {
-  const data = event.target.parentElement.parentElement.dataset;
-
-  const endBase = new Date(data.dateTime);
-  endBase.setHours(endBase.getHours() + HOURS_PER_EVENT);
-  const title = data.title;
-  const description = data.description;
-  let location = data.location;
+function getLocation(location) {
   if (location.includes(`Students' Union`)) {
     location = location.replace(
       `Students' Union`,
       `Sheffield Students' Union, Western Bank, Broomhall, Sheffield S10 2TG`
     );
   }
+  return location;
+}
+
+function getCalendarEvent(event) {
+  const data = event.target.parentElement.parentElement.dataset;
+  const endBase = new Date(data.dateTime);
+  endBase.setHours(endBase.getHours() + HOURS_PER_EVENT);
 
   return {
-    title,
-    description,
-    location,
+    title: data.title,
+    description: data.description,
+    location: data.location,
     start: new Date(data.dateTime),
     end: endBase,
   };
@@ -386,7 +386,7 @@ function getEventDetails(now, el) {
   }
 
   const whereEl = el.querySelector(".where");
-  const location = whereEl ? whereEl.innerText : "";
+  const location = getLocation(whereEl ? whereEl.innerText : "");
   const whatEl = el.querySelector(".what");
   const description = whatEl ? whatEl.innerText : "";
 
@@ -408,6 +408,7 @@ function getEventDetails(now, el) {
     title,
     description,
     location,
+    dateTime,
     start: new Date(dateTime),
     end: endBase,
   };
