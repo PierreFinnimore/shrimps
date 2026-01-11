@@ -285,6 +285,12 @@ function handleGoogleClick(event) {
 function handleICSClick(event) {
   event.stopPropagation();
   const calendarEvent = getCalendarEvent(event);
+
+  const filename =
+    (calendarEvent.title || "event") +
+    " - " +
+    calendarEvent.start.toISOString();
+
   const url = URL.createObjectURL(
     new Blob(
       [
@@ -293,7 +299,7 @@ function handleICSClick(event) {
           "VERSION:2.0",
           "PRODID:-//yourdomain//EN",
           "BEGIN:VEVENT",
-          "UID:" + Date.now() + "@example.com",
+          "UID:" + filename.toUpperCase(),
           "DTSTAMP:" + formatICSDate(new Date()),
           "DTSTART:" + formatICSDate(calendarEvent.start),
           "DTEND:" + formatICSDate(calendarEvent.end),
@@ -311,7 +317,8 @@ function handleICSClick(event) {
   );
   const a = document.createElement("a");
   a.href = url;
-  a.download = (calendarEvent.title || "event") + ".ics";
+
+  a.download = filename + ".ics";
   document.body.appendChild(a);
   a.click();
   a.remove();
