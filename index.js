@@ -252,15 +252,13 @@ function getCalendarEvent(event) {
       `Sheffield Students' Union, Western Bank, Broomhall, Sheffield S10 2TG`
     );
   }
-  const start = new Date(data.dateTime);
-  const end = endBase;
 
   return {
     title,
     description,
     location,
-    start,
-    end,
+    start: new Date(data.dateTime),
+    end: endBase,
   };
 }
 
@@ -282,47 +280,67 @@ function handleGoogleClick(event) {
   );
 }
 
-function handleICSClick(event) {
-  event.stopPropagation();
-  const calendarEvent = getCalendarEvent(event);
+function makeUID(event, idx) {
+  const base =
+    (event.title || "event") + "-" + (event.start?.toISOString?.() || idx);
+  return encodeURIComponent(base) + "@shrimspimprov.com";
+}
 
-  const filename =
-    (calendarEvent.title || "event") +
-    " - " +
-    calendarEvent.start.toISOString();
+function buildICS(events = []) {
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//shrimpsimprov.com//EN",
+    "CALSCALE:GREGORIAN",
+  ];
+  events.forEach((ev, i) => {
+    const start = ev.start instanceof Date ? ev.start : new Date(ev.start);
+    const end = ev.end instanceof Date ? ev.end : new Date(ev.end || start);
+    lines.push("BEGIN:VEVENT");
+    lines.push("UID:" + makeUID(ev, i));
+    lines.push("DTSTAMP:" + formatICSDate(new Date()));
+    lines.push("DTSTART:" + formatICSDate(start));
+    lines.push("DTEND:" + formatICSDate(end));
+    if (ev.title) {
+      lines.push("SUMMARY:" + ev.title.replace(/\r\n|\n/g, "\\n"));
+    }
+    if (ev.description) {
+      lines.push("DESCRIPTION:" + ev.description.replace(/\r\n|\n/g, "\\n"));
+    }
+    if (ev.location) {
+      lines.push("LOCATION:" + ev.location.replace(/\r\n|\n/g, "\\n"));
+    }
+    lines.push("URL:https://shrimpsimprov.com/");
+    lines.push("END:VEVENT");
+  });
 
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+
+function downloadICS(filename, events = []) {
   const url = URL.createObjectURL(
-    new Blob(
-      [
-        [
-          "BEGIN:VCALENDAR",
-          "VERSION:2.0",
-          "PRODID:-//yourdomain//EN",
-          "BEGIN:VEVENT",
-          "UID:" + filename.toUpperCase(),
-          "DTSTAMP:" + formatICSDate(new Date()),
-          "DTSTART:" + formatICSDate(calendarEvent.start),
-          "DTEND:" + formatICSDate(calendarEvent.end),
-          "SUMMARY:" + (calendarEvent.title || ""),
-          "DESCRIPTION:" + (calendarEvent.description || ""),
-          "LOCATION:" + (calendarEvent.location || ""),
-          "END:VEVENT",
-          "END:VCALENDAR",
-        ].join("\r\n"),
-      ],
-      {
-        type: "text/calendar;charset=utf-8",
-      }
-    )
+    new Blob([buildICS(events)], {
+      type: "text/calendar;charset=utf-8",
+    })
   );
   const a = document.createElement("a");
   a.href = url;
-
   a.download = filename + ".ics";
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function handleICSClick(event) {
+  event.stopPropagation();
+  const calendarEvent = getCalendarEvent(event);
+  const filename =
+    (calendarEvent.title || "event") +
+    " - " +
+    calendarEvent.start.toISOString();
+  downloadICS(filename, [calendarEvent]);
 }
 
 function formatICSDate(date) {
@@ -357,6 +375,44 @@ function toggleCalendarDropdown(event) {
   }
 }
 
+function getEventDetails(now, el) {
+  const timeEl = el.querySelector("time");
+  if (!timeEl) {
+    return;
+  }
+  const dateTime = new Date(timeEl.dateTime);
+  if (dateTime < now) {
+    return;
+  }
+
+  const whereEl = el.querySelector(".where");
+  const location = whereEl ? whereEl.innerText : "";
+  const whatEl = el.querySelector(".what");
+  const description = whatEl ? whatEl.innerText : "";
+
+  const parent = el.parentElement;
+  const isShow =
+    parent.id === "next-show" || parent.parentElement.id === "shows";
+  const showTitleEl = el.querySelector(".show-name");
+  let title = "Shrimps Improv Workshop";
+  if (isShow) {
+    title = showTitleEl
+      ? showTitleEl.innerText + " (Improv Show)"
+      : "Shrimps Improv Show";
+  }
+
+  const endBase = new Date(dateTime);
+  endBase.setHours(endBase.getHours() + HOURS_PER_EVENT);
+
+  return {
+    title,
+    description,
+    location,
+    start: new Date(dateTime),
+    end: endBase,
+  };
+}
+
 function setupCalendars() {
   const now = new Date();
   document
@@ -364,42 +420,49 @@ function setupCalendars() {
       "#shows ol li, #workshops ol li, #next-workshop li, #next-show li"
     )
     .forEach((el) => {
-      const timeEl = el.querySelector("time");
-      if (!timeEl) {
+      const calendarEvent = getEventDetails(now, el);
+      if (!calendarEvent) {
         return;
-      }
-      const dateTime = new Date(timeEl.dateTime);
-      if (dateTime < now) {
-        return;
-      }
-
-      const whereEl = el.querySelector(".where");
-      const location = whereEl ? whereEl.innerText : "";
-      const whatEl = el.querySelector(".what");
-      const description = whatEl ? whatEl.innerText : "";
-
-      const parent = el.parentElement;
-
-      const isShow =
-        parent.id === "next-show" || parent.parentElement.id === "shows";
-      const showTitleEl = el.querySelector(".show-name");
-      let title = "Shrimps Improv Workshop";
-      if (isShow) {
-        title = showTitleEl
-          ? showTitleEl.innerText + " (Improv Show)"
-          : "Shrimps Improv Show";
       }
       const buttonEl = document.createElement("button");
       buttonEl.classList.add("toggle-calendar", "inline-button");
       buttonEl.innerText = "+";
       buttonEl.type = "button";
-      buttonEl.dataset.dateTime = dateTime;
-      buttonEl.dataset.location = location;
-      buttonEl.dataset.title = title;
-      buttonEl.dataset.description = description;
+      buttonEl.dataset.dateTime = calendarEvent.dateTime;
+      buttonEl.dataset.location = calendarEvent.location;
+      buttonEl.dataset.title = calendarEvent.title;
+      buttonEl.dataset.description = calendarEvent.description;
       buttonEl.addEventListener("click", toggleCalendarDropdown);
       el.appendChild(buttonEl);
     });
+
+  const showListEls = document.querySelectorAll("#shows ol li");
+  const showEvents = [];
+  showListEls.forEach((el) => {
+    const calendarEvent = getEventDetails(now, el);
+    if (!calendarEvent) {
+      return;
+    }
+    showEvents.push(calendarEvent);
+  });
+  document.getElementById("addShows").addEventListener("click", () => {
+    const filename = "All Shows";
+    downloadICS(filename, showEvents);
+  });
+
+  const workshopListEls = document.querySelectorAll("#workshops ol li");
+  const workshopEvents = [];
+  workshopListEls.forEach((el) => {
+    const calendarEvent = getEventDetails(now, el);
+    if (!calendarEvent) {
+      return;
+    }
+    workshopEvents.push(calendarEvent);
+  });
+  document.getElementById("addWorkshops").addEventListener("click", () => {
+    const filename = "All Workshops";
+    downloadICS(filename, workshopEvents);
+  });
 }
 
 function main() {
